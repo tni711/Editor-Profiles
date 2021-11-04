@@ -707,10 +707,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Use markdown-mode for markdown files
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (use-package markdown-mode
-;;   :ensure t
-;;   :mode (".md" ".markdown"))
-;;   :init (setq markdown-command "/usr/bin/markdown")
+(use-package markdown-mode
+  :ensure t
+  :mode (".md" ".markdown"))
+  :init (setq markdown-command "/usr/bin/markdown")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Org-Mode
@@ -1265,7 +1265,7 @@
  '(lsp-ui-sideline-ignore-duplicate t)
  '(lsp-ui-sideline-show-code-actions nil)
  '(package-selected-packages
-   '(timu-spacegrey-theme gnu-elpa-keyring-update rust-mode websocket rjsx-mode js-jsx-mode zones edit-indirect ac-ispell company flymake-rust toml toml-mode lsp-ui c++-mode dumb-jump-mode dumb-jump virtualenvwrapper company-lsp lsp-mode eglot racer flycheck-rust cargo lua-mode flycheck-golangci-lint format-all go-tag go-autocomplete go-mode evil vue-mode vyper-mode zenburn-theme smiles-mode gruber-darker-theme multicolumn zencoding-mode gruvbox-theme dired-hide-dotfiles ag geben-helm-projectile counsel-hydra ivy-hydra fuzzy fzf counsel-world-clock counsel-projectile magit-gerrit magit zzz-to-char yasnippet-snippets yapfify yaml-mode writegood-mode window-numbering which-key wgrep web-mode vlf use-package string-inflection sourcerer-theme realgud rainbow-delimiters powerline origami multiple-cursors modern-cpp-font-lock json-mode hungry-delete google-c-style git-gutter flyspell-correct-ivy flycheck-ycmd flycheck-pyflakes elpy edit-server cuda-mode counsel-etags company-ycmd company-jedi cmake-font-lock clang-format beacon autopair auto-package-update auctex async))
+   '(markdown-mode timu-spacegrey-theme gnu-elpa-keyring-update rust-mode websocket rjsx-mode js-jsx-mode zones edit-indirect ac-ispell company flymake-rust toml toml-mode lsp-ui c++-mode dumb-jump-mode dumb-jump virtualenvwrapper company-lsp lsp-mode eglot racer flycheck-rust cargo lua-mode flycheck-golangci-lint format-all go-tag go-autocomplete go-mode evil vue-mode vyper-mode zenburn-theme smiles-mode gruber-darker-theme multicolumn zencoding-mode gruvbox-theme dired-hide-dotfiles ag geben-helm-projectile counsel-hydra ivy-hydra fuzzy fzf counsel-world-clock counsel-projectile magit-gerrit magit zzz-to-char yasnippet-snippets yapfify yaml-mode writegood-mode window-numbering which-key wgrep web-mode vlf use-package string-inflection sourcerer-theme realgud rainbow-delimiters powerline origami multiple-cursors modern-cpp-font-lock json-mode hungry-delete google-c-style git-gutter flyspell-correct-ivy flycheck-ycmd flycheck-pyflakes elpy edit-server cuda-mode counsel-etags company-ycmd company-jedi cmake-font-lock clang-format beacon autopair auto-package-update auctex async))
  '(pdf-view-midnight-colors '("#fdf4c1" . "#32302f"))
  '(show-paren-mode t)
  '(tool-bar-mode nil))
