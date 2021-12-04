@@ -1,7 +1,8 @@
 ;;; initfile --- Summary:
 ;;; Commentary:
-;;; Emacs 27.1
-;;; Date: August 25, 2019
+;;; Emacs 27.2
+;;; Created Date: August 25, 2029
+;;; Updated Date: Dec 3, 2021
 ;;; Author: Thomas Tang
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -25,12 +26,10 @@
 (mapc #'(lambda (add) (add-to-list 'load-path add))
       (eval-when-compile
         (require 'package)
-        (package-initialize)
-        ;; Install use-package if not installed yet.
+        ;;(package-initialize)
         (unless (package-installed-p 'use-package)
           (package-refresh-contents)
           (package-install 'use-package))
-        ;; (require 'use-package)
         (let ((package-user-dir-real (file-truename package-user-dir)))
           ;; The reverse is necessary, because outside we mapc
           ;; add-to-list element-by-element, which reverses.
@@ -50,15 +49,14 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Garbage Collection
 ;; By default Emacs triggers garbage collection at ~0.8MB which makes
 ;; startup really slow. Since most systems have at least 64MB of memory,
 ;; we increase it during initialization.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(setq gc-cons-threshold 64000000)
-(add-hook 'after-init-hook #'(lambda ()
-	;; restore after startup
-  (setq gc-cons-threshold 800000)))
-
+;; The default is 800 kilobytes.  Measured in bytes.
+(setq gc-cons-threshold (* 50 1000 1000))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Start emacs server if not already running
@@ -71,6 +69,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; General Tweaks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; default to UTF-8
+(set-default-coding-systems 'utf-8)
 
 ;; turn on highlight matching brackets when cursor is on one
 (show-paren-mode t)
@@ -114,7 +115,13 @@
 ;; Disable auto-fill-mode in programming mode
 (add-hook 'prog-mode-hook (lambda () (auto-fill-mode -1)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Global Keyboard Shortcuts
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; ESC cancels all
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
 ;; Set help to C-?
 (global-set-key (kbd "C-?") 'help-command)
 
@@ -129,9 +136,6 @@
 
 ;; Use meta+tab word completion
 (global-set-key (kbd "M-TAB") 'dabbrev-expand)
-
-;; Easy undo key
-(global-set-key (kbd "C-/") 'undo)
 
 ;; Comment or uncomment the region
 (global-set-key (kbd "C-c ;") 'comment-or-uncomment-region)
@@ -151,6 +155,8 @@
 ;; Smex is a M-x enhancement for interface to mostly recently used commands.
 (global-set-key (kbd "M-x") 'smex)
 
+
+
 ;; We don't want to type yes and no all the time so, do y and n
 (defalias 'yes-or-no-p 'y-or-n-p)
 
@@ -166,8 +172,6 @@
 (setq ring-bell-function 'ignore)
 
 ;; Non-nil means draw block cursor as wide as the glyph under it.
-;; For example, if a block cursor is over a tab, it will be drawn as
-;; wide as that tab on the display.
 (setq x-stretch-cursor t)
 
 ;; Dont ask to follow symlink in git
@@ -180,16 +184,16 @@
 
 ;; Highlight some keywords in prog-mode
 (add-hook 'prog-mode-hook
-          (lambda ()
-            ;; Highlighting in cmake-mode this way interferes with
-            ;; cmake-font-lock, which is something I don't yet understand.
-            (when (not (derived-mode-p 'cmake-mode))
-              (font-lock-add-keywords
-               nil
-               '(("\\<\\(FIXME\\|TODO\\|BUG\\|DONE\\)"
-                  1 font-lock-warning-face t))))
-            )
-          )
+    (lambda ()
+    ;; Highlighting in cmake-mode this way interferes with
+    ;; cmake-font-lock, which is something I don't yet understand.
+    (when (not (derived-mode-p 'cmake-mode))
+	(font-lock-add-keywords
+	nil
+	'(("\\<\\(FIXME\\|TODO\\|BUG\\|DONE\\)"
+	    1 font-lock-warning-face t))))
+    )
+    )
 
 ;; Setup use-package
 (eval-when-compile
@@ -309,8 +313,8 @@
   (setq auto-package-update-hide-results t)
   (auto-package-update-maybe)
   (add-hook 'auto-package-update-before-hook
-          (lambda () (message "I will update packages now")))
-  )
+    (lambda () (message "I will update packages now")))
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; hide dot files in dired mode
@@ -332,8 +336,18 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; evil-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package evil :ensure t)
-(evil-mode 1)
+(use-package evil
+  :ensure t
+  :config
+  (require 'evil)
+  (evil-mode 1)
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  (setq evil-respect-visual-line-mode t)
+  (setq evil-undo-system 'undo-tree)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Find file packages
@@ -681,7 +695,8 @@
     ;; Silence missing function warnings
     (declare-function which-key-mode "which-key.el"))
   :config
-  (which-key-mode))
+  (which-key-mode)
+  (setq which-key-idle-delay 0.3))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -761,15 +776,15 @@
 ;; autopair
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Automatically at closing brace, bracket and quote
-(use-package autopair
-  :ensure t
-  :init
-  (eval-when-compile
-    ;; Silence missing function warnings
-    (declare-function autopair-global-mode "autopair.el"))
-  :config
-  (autopair-global-mode t)
-  )
+;; (use-package autopair
+;;   :ensure t
+;;   :init
+;;   (eval-when-compile
+;;     ;; Silence missing function warnings
+;;     (declare-function autopair-global-mode "autopair.el"))
+;;   :config
+;;   (autopair-global-mode t)
+;;   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Flyspell Mode for Spelling Corrections
@@ -872,18 +887,6 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; rust-mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (add-to-list 'load-path "/home/tangth/rust-mode/")
-;; (autoload 'rust-mode "rust-mode" nil t)
-;; (use-package rust-mode
-;;    (add-hook 'rust-mode-hook #'racer-mode)
-;;    (add-hook 'racer-mode-hook #'eldoc-mode)
-;;    (add-hook 'rust-mode-hook
-;; 	(lambda () (setq indent-tabs-mode nil)))
-;; )
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; lsp-mode
 ;; Programming Language Auto Complete using LSP Client and Server
 ;; https://github.com/emacs-lsp/lsp-mode#installation
@@ -961,7 +964,8 @@
                                   1 font-lock-warning-face t)))
                           ))
     )
-  )
+
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package: yasnippet
@@ -993,34 +997,39 @@
   :bind ("C-M-y" . company-yasnippet)
   :after (yasnippet))
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Org mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package org-roam
+  :ensure t
+  :init
+  (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory "~/RoamNotes")
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+	 ("C-c n f" . org-roam-node-find)
+	 ("C-c n i" . org-roam-node-insert))
+  :config
+  (org-roam-setup)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Appearance
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; The deeper blue is loaded but the resulting text
-;; appears black in Aquamacs. This can be fixed by setting
-;; the font color under Menu Bar->Options->Appearance->Font For...
-;; and then setting "Adopt Face and Frame Parameter as Frame Default"
-;; (use-package sourcerer-theme
-;;   :ensure t
-;;   :config
-;;   (load-theme 'sourcerer t))
+;;
+;; (load-theme 'wombat t)
 
-;; (use-package zenburn-theme
-;;     :ensure t
-;;     :config (load-theme 'zenburn t))
+(use-package doom-themes
+    :ensure t
+    :config (load-theme 'doom-vibrant t))
 
-;;(load-theme 'wombat t)
-
-(use-package spacegray-theme
-  :config (load-theme 'spacegray t))
-
-
-
-(set-face-background 'hl-line "#372E2D")
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Customization
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The minibuffer default colors with my theme are impossible to read, so change
 ;; them to something better using ivy-minibuffer-match-face.
+(set-face-background 'hl-line "#372E2D")
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -1159,6 +1168,7 @@
 (add-hook 'buffer-list-update-hook
           'sl/display-header)
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Powerline theme
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1240,32 +1250,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ansi-color-faces-vector
-   [default default default italic underline success warning error])
- '(ansi-color-names-vector
-   ["#2e3436" "#a40000" "#4e9a06" "#c4a000" "#204a87" "#5c3566" "#729fcf" "#eeeeec"])
- '(column-number-mode t)
- '(counsel-locate-cmd 'counsel-locate-cmd-default)
- '(cua-mode t nil (cua-base))
- '(custom-enabled-themes '(wombat))
- '(custom-safe-themes
-   '("8e797edd9fa9afec181efbfeeebf96aeafbd11b69c4c85fa229bb5b9f7f7e66c" "2b9dc43b786e36f68a9fd4b36dd050509a0e32fe3b0a803310661edb7402b8b6" "47ec21abaa6642fefec1b7ace282221574c2dd7ef7715c099af5629926eb4fd7" "b583823b9ee1573074e7cbfd63623fe844030d911e9279a7c8a5d16de7df0ed0" "1436d643b98844555d56c59c74004eb158dc85fc55d2e7205f8d9b8c860e177f" "585942bb24cab2d4b2f74977ac3ba6ddbd888e3776b9d2f993c5704aa8bb4739" "a22f40b63f9bc0a69ebc8ba4fbc6b452a4e3f84b80590ba0a92b4ff599e53ad0" "8f97d5ec8a774485296e366fdde6ff5589cf9e319a584b845b6f7fa788c9fa9a" default))
- '(frame-brackground-mode 'dark)
  '(git-gutter:update-interval 5)
- '(locate-fcodes-file "/Users/tangt/tangth_db")
- '(locate-update-path "/")
- '(lsp-auto-guess-root nil)
- '(lsp-prefer-flymake nil t)
- '(lsp-ui-doc-border "black")
- '(lsp-ui-doc-enable t)
- '(lsp-ui-doc-header t)
- '(lsp-ui-doc-include-signature t)
- '(lsp-ui-doc-position 'top)
- '(lsp-ui-sideline-enable nil)
- '(lsp-ui-sideline-ignore-duplicate t)
- '(lsp-ui-sideline-show-code-actions nil)
  '(package-selected-packages
-   '(markdown-mode timu-spacegrey-theme gnu-elpa-keyring-update rust-mode websocket rjsx-mode js-jsx-mode zones edit-indirect ac-ispell company flymake-rust toml toml-mode lsp-ui c++-mode dumb-jump-mode dumb-jump virtualenvwrapper company-lsp lsp-mode eglot racer flycheck-rust cargo lua-mode flycheck-golangci-lint format-all go-tag go-autocomplete go-mode evil vue-mode vyper-mode zenburn-theme smiles-mode gruber-darker-theme multicolumn zencoding-mode gruvbox-theme dired-hide-dotfiles ag geben-helm-projectile counsel-hydra ivy-hydra fuzzy fzf counsel-world-clock counsel-projectile magit-gerrit magit zzz-to-char yasnippet-snippets yapfify yaml-mode writegood-mode window-numbering which-key wgrep web-mode vlf use-package string-inflection sourcerer-theme realgud rainbow-delimiters powerline origami multiple-cursors modern-cpp-font-lock json-mode hungry-delete google-c-style git-gutter flyspell-correct-ivy flycheck-ycmd flycheck-pyflakes elpy edit-server cuda-mode counsel-etags company-ycmd company-jedi cmake-font-lock clang-format beacon autopair auto-package-update auctex async))
- '(pdf-view-midnight-colors '("#fdf4c1" . "#32302f"))
- '(show-paren-mode t)
- '(tool-bar-mode nil))
+   '(org-roam doom-themes zzz-to-char yasnippet-snippets yaml-mode writegood-mode window-numbering which-key wgrep web-mode vlf use-package typescript-mode string-inflection realgud rainbow-delimiters powerline origami multiple-cursors markdown-mode magit json-mode hungry-delete git-gutter fzf evil dumb-jump dired-hide-dotfiles cuda-mode counsel-projectile counsel-etags cmake-font-lock beacon auto-package-update async ag)))
