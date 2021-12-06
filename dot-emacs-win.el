@@ -445,8 +445,8 @@
   (add-hook
    'prog-mode-hook
    (lambda () (add-hook 'after-save-hook
-                        (lambda ()
-                          (counsel-etags-virtual-update-tags))))
+	(lambda ()
+	    (counsel-etags-virtual-update-tags))))
    )
 
   ;; The function provided by counsel-etags is broken (at least on Linux)
@@ -608,27 +608,6 @@
 (use-package wgrep
   :ensure t)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Edit server to allow editing of things in Chrome with Emacs
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; need to insall websocket 1.6 for this to work in windows 10
-
-;; (use-package edit-server
-;;   :ensure t
-;;   :config
-;;   (progn
-;;     (eval-when-compile
-;;       ;; Silence missing function warnings
-;;       (declare-function edit-server-start "edit-server-start.el"))
-;;     (when (daemonp)
-;;       (edit-server-start)
-;;       )
-;;     (add-hook 'edit-server-start-hook
-;;               (lambda ()
-;;                 (when (string-match "github.com" (buffer-name))
-;;                   (markdown-mode))))
-;;     )
-;;   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Origami - Does code folding, ie hide the body of an
@@ -773,51 +752,6 @@
          ("\\.cuh\\'" . cuda-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; autopair
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Automatically at closing brace, bracket and quote
-;; (use-package autopair
-;;   :ensure t
-;;   :init
-;;   (eval-when-compile
-;;     ;; Silence missing function warnings
-;;     (declare-function autopair-global-mode "autopair.el"))
-;;   :config
-;;   (autopair-global-mode t)
-;;   )
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Flyspell Mode for Spelling Corrections
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (use-package flyspell
-;;   :ensure t
-;;   :init
-;;   (eval-when-compile
-;;     ;; Silence missing function warnings
-;;     (declare-function flyspell-goto-next-error "flyspell.el")
-;;     (declare-function flyspell-mode "flyspell.el")
-;;     (declare-function flyspell-prog-mode "flyspell.el"))
-;;   (setq flyspell-issue-welcome-flag nil)
-;;   :config
-;;   (defun flyspell-check-next-highlighted-word ()
-;;     "Custom function to spell check next highlighted word."
-;;     (interactive)
-;;     (flyspell-goto-next-error)
-;;     (ispell-word))
-
-;;   (global-set-key (kbd "<f7>") 'flyspell-buffer)
-;;   (global-set-key (kbd "<f8>") 'flyspell-correct-previous)
-;;   (global-set-key (kbd "<f9>") 'flyspell-correct-previous)
-
-;;   (add-hook 'text-mode-hook #'flyspell-mode)
-;;   (add-hook 'prog-mode-hook #'flyspell-prog-mode)
-;;   (add-hook 'org-mode-hook #'flyspell-mode)
-;;   )
-;; (use-package flyspell-correct-ivy
-;;   :ensure t
-;;   :after flyspell)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Magit
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package magit
@@ -854,6 +788,17 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; company-mode
+;; text completion framework
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package company
+  :ensure t)
+
+;; use company mode for all buffers
+(global-company-mode)
+(add-hook 'after-init-hook 'global-company-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; web-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package web-mode
@@ -865,9 +810,6 @@
          ("\\.erb\\'" . web-mode)
          ("\\.mustache\\'" . web-mode)
          ("\\.djhtml\\'" . web-mode)
-         ("\\.js\\'" . web-mode)
-         ("\\.jsx\\'" . web-mode)
-         ("\\.ts\\'" . web-mode)
          ("\\.html?\\'" . web-mode))
   )
 
@@ -878,6 +820,7 @@
   :ensure t
   :mode (".yml" ".yaml"))
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; json-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -887,65 +830,7 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; lsp-mode
-;; Programming Language Auto Complete using LSP Client and Server
-;; https://github.com/emacs-lsp/lsp-mode#installation
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (use-package lsp-mode
-;;   :config
-;;   ;; `-background-index' requires clangd v8+!
-;;   (setq lsp-clients-clangd-args '("-j=4" "-background-index" "-log=error"))
-;;   ;; flycheck is used instead in lsp-ui
-;;   (setq lsp-prefer-flymake nil)
-;;   (add-hook 'c++-mode-hook #'lsp)
-;;   (add-hook 'c-mode-hook #'lsp)
-;;   (add-hook 'python-mode-hook #'lsp))
-
-  ;; (add-hook 'go-mode-hook #'lsp)
-  ;; (add-hook 'rust-mode-hook #'lsp))
-
-;; (use-package lsp-ui
-;;   :requires lsp-mode flycheck
-;;   :config
-
-;;   (setq lsp-ui-doc-enable t
-;;         lsp-ui-doc-use-childframe t
-;;         lsp-ui-doc-position 'top
-;;         lsp-ui-doc-include-signature t
-;;         lsp-ui-sideline-enable nil
-;;         lsp-ui-flycheck-enable t
-;;         lsp-ui-flycheck-list-position 'right
-;;         lsp-ui-flycheck-live-reporting t
-;;         lsp-ui-peek-enable t
-;;         lsp-ui-peek-list-width 60
-;;         lsp-ui-peek-peek-height 25)
-
-;;   (add-hook 'lsp-mode-hook 'lsp-ui-mode))
-
-
-;; For completions at cursor, use company-mode
-;; (use-package company
-;;   :config
-;;   (setq company-idle-delay 0.3)
-
-;;   (global-company-mode 1)
-;;   (global-set-key (kbd "C-<tab>") 'company-complete))
-
-
-;; (use-package company-lsp
-;;   :requires company
-;;   :config
-;;   (push 'company-lsp company-backends)
-
-;;    ;; Disable client-side cache because the LSP server does a better job.
-;;   (setq company-transformers nil
-;;         company-lsp-async t
-;;         company-lsp-cache-candidates nil))
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; cmake-mode
+;; cmake mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package cmake-mode
   :ensure t
@@ -964,8 +849,53 @@
                                   1 font-lock-warning-face t)))
                           ))
     )
-
 )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; flycheck mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package flycheck
+  :ensure t)
+
+;;(global-flycheck-mode t)
+;;(add-hook 'after-init-hook #'global-flycheck-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; RJSX mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package rjsx-mode
+  :ensure t
+  :mode (("\\.js\\'" . rjsx-mode)
+         ("\\.ts\\'" . rjsx-mode)
+         ("\\.jsx\\'" . rjsx-mode))
+)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Tide
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun setup-tide-mode()
+  "Setup function for tide."
+  (interactive)
+  (tide-setup)
+  (flycheck-mode +1)
+  (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  (tide-hl-identifier-mode +1)
+  (company-mode +1))
+
+(use-package tide
+  :ensure t
+  :after (rjsx-mode company flycheck)
+  :hook (rjsx-mode . setup-tide-mode))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Prettier
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package prettier-js
+  :ensure t
+  :after (rjsx-mode)
+  :hook (rjsx-mode . prettier-js-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package: yasnippet
@@ -1000,18 +930,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Org mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package org-roam
-  :ensure t
-  :init
-  (setq org-roam-v2-ack t)
-  :custom
-  (org-roam-directory "~/RoamNotes")
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-	 ("C-c n f" . org-roam-node-find)
-	 ("C-c n i" . org-roam-node-insert))
-  :config
-  (org-roam-setup)
-  )
+;; (use-package org-roam
+;;   :ensure t
+;;   :init
+;;   (setq org-roam-v2-ack t)
+;;   :custom
+;;   (org-roam-directory "~/RoamNotes")
+;;   :bind (("C-c n l" . org-roam-buffer-toggle)
+;; 	 ("C-c n f" . org-roam-node-find)
+;; 	 ("C-c n i" . org-roam-node-insert))
+;;   :config
+;;   (org-roam-setup)
+;;   )
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Appearance
@@ -1038,14 +969,14 @@
  '(default ((((type tty) (background dark)) (:background "nil"))))
  '(company-preview ((t (:background "#073642" :foreground "#2aa198"))))
  '(company-preview-common ((t (:foreground "#93a1a1" :underline t))))
- '(company-scrollbar-bg ((t (:background "#073642" :foreground "#2aa198"))))
- '(company-scrollbar-fg ((t (:foreground "#002b36" :background "#839496"))))
  '(company-template-field ((t (:background "#7B6000" :foreground "#073642"))))
  '(company-tooltip ((t (:background "black" :foreground "DeepSkyBlue1"))))
  '(company-tooltip-annotation ((t (:foreground "#93a1a1" :background "#073642"))))
  '(company-tooltip-common ((t (:foreground "#93a1a1" :underline t))))
  '(company-tooltip-common-selection ((t (:foreground "#93a1a1" :underline t))))
  '(company-tooltip-mouse ((t (:background "DodgerBlue4" :foreground "CadetBlue1"))))
+ '(company-tooltip-scrollbar-thumb ((t (:foreground "#002b36" :background "#839496"))))
+ '(company-tooltip-scrollbar-track ((t (:background "#073642" :foreground "#2aa198"))))
  '(company-tooltip-selection ((t (:background "DodgerBlue4" :foreground "CadetBlue1"))))
  '(header-line ((t (:background "#003366"))))
  '(ivy-minibuffer-match-face-1 ((((class color) (background light)) (:background "#555555")) (((class color) (background dark)) (:background "#555555"))))
@@ -1252,4 +1183,4 @@
  ;; If there is more than one, they won't work right.
  '(git-gutter:update-interval 5)
  '(package-selected-packages
-   '(org-roam doom-themes zzz-to-char yasnippet-snippets yaml-mode writegood-mode window-numbering which-key wgrep web-mode vlf use-package typescript-mode string-inflection realgud rainbow-delimiters powerline origami multiple-cursors markdown-mode magit json-mode hungry-delete git-gutter fzf evil dumb-jump dired-hide-dotfiles cuda-mode counsel-projectile counsel-etags cmake-font-lock beacon auto-package-update async ag)))
+   '(prettier-js rjsx-mode org-roam-setup tide flycheck company company-mode org-roam doom-themes zzz-to-char yasnippet-snippets yaml-mode writegood-mode window-numbering which-key wgrep web-mode vlf use-package typescript-mode string-inflection realgud rainbow-delimiters powerline origami multiple-cursors markdown-mode magit json-mode hungry-delete git-gutter fzf evil dumb-jump dired-hide-dotfiles cuda-mode counsel-projectile counsel-etags cmake-font-lock beacon auto-package-update async ag)))
