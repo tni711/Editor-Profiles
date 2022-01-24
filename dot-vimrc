@@ -1,0 +1,232 @@
+" Thomas tang VIM setup
+" using Plug package manager
+" July 21, 2018
+"
+"
+" Install vim-plug if we don't already have it
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+"----------------------------------------------------------------------
+" Package requirements
+"----------------------------------------------------------------------
+call plug#begin('~/.vim/plugged')
+
+"git interface
+Plug 'tpope/vim-fugitive'
+
+"filesystem
+Plug	'scrooloose/nerdtree'
+Plug	'jistr/vim-nerdtree-tabs'
+Plug	'kien/ctrlp.vim' 
+Plug	'ludovicchabant/vim-gutentags'
+
+"html
+Plug 'isnowfy/python-vim-instant-markdown'
+"Plug 'jtratner/vim-flavored-markdown'
+"Plug 'suan/vim-instant-markdown'
+"Plug 'nelstrom/vim-markdown-preview'
+Plug 'Townk/vim-autoclose'
+Plug 'vim-scripts/closetag.vim'
+"Plug 'tmhedberg/SimpylFold'
+Plug 'airblade/vim-gitgutter'
+Plug 'JamshedVesuna/vim-markdown-preview'
+"python sytax checker
+Plug 'nvie/vim-flake8'
+Plug 'vim-scripts/indentpython.vim'
+Plug 'scrooloose/syntastic'
+
+"auto-completion stuff
+"Plug 'Valloric/YouCompleteMe'
+Plug 'ervandew/supertab'
+Plug 'jremmen/vim-ripgrep'
+Plug 'mileszs/ack.vim'
+
+"Powerline is a status bar that displays things like the current virtualenv, git branch, files
+" being edited, and much more.
+Plug 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
+"
+"color schemes
+Plug 'morhetz/gruvbox'
+Plug 'Yggdroot/duoduo'
+Plug  'cocopon/iceberg.vim'
+
+"js beautify javascript
+Plug 'maksimr/vim-jsbeautify'
+
+filetype plugin indent on			" required! 
+call plug#end()
+
+"
+"----------------------------------------------------------------------
+" Global setup
+"----------------------------------------------------------------------
+filetype plugin indent on    " enables filetype detection
+set encoding=utf-8
+let mapleader=" "
+set noswapfile
+set number
+set tabstop=2
+set shiftwidth=2
+set softtabstop=2
+set guifont=Monspace:h20
+
+"----------------------------------------------------------------------
+" Color Theme
+" Color schemes work in conjunction with the basic color scheme that you are using. 
+" Check out solarized for GUI mode, and Zenburn for terminal mode:
+"----------------------------------------------------------------------
+if has('gui_running')
+		colorscheme delek
+else
+    colorscheme iceberg 
+endif
+
+"----------------------------------------------------------------------
+" Auto Complete setup
+"----------------------------------------------------------------------
+autocmd FileType python set omnifunc=pythoncomplete#Complete
+
+"----------------------------------------------------------------------
+" Markdown Preview
+"---------------------------------------------------------------------
+let vim_markdown_preview_hotkey='<C-m>'
+
+"----------------------------------------------------------------------
+" Ctrl-P / matchers setup
+"---------------------------------------------------------------------
+let g:path_to_matcher = "/usr/local/bin/matcher"
+let g:ctrlp_user_command = ['.git/', 'cd %s && git ls-files . -co --exclude-standard']
+let g:ctrlp_match_func = { 'match': 'GoodMatch' }
+
+"----------------------------------------------------------------------
+" Silver Searcher and Matcher setup
+"----------------------------------------------------------------------
+if executable('ag')
+  " Use ag over grep
+  set grepprg=ag\ --nogroup\ --nocolor
+  " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
+  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+endif
+
+
+if executable('matcher')
+    let g:ctrlp_match_func = { 'match': 'GoodMatch' }
+
+    function! GoodMatch(items, str, limit, mmode, ispath, crfile, regex)
+      " Create a cache file if not yet exists
+      let cachefile = ctrlp#utils#cachedir().'/matcher.cache'
+      if !( filereadable(cachefile) && a:items == readfile(cachefile) )
+        call writefile(a:items, cachefile)
+      endif
+      if !filereadable(cachefile)
+        return []
+      endif
+      " a:mmode is currently ignored. In the future, we should probably do
+      " something about that. the matcher behaves like "full-line".
+      let cmd = 'matcher --limit '.a:limit.' --manifest '.cachefile.' '
+      if !( exists('g:ctrlp_dotfiles') && g:ctrlp_dotfiles )
+        let cmd = cmd.'--no-dotfiles '
+      endif
+      let cmd = cmd.a:str
+      return split(system(cmd), "\n")
+    endfunction
+end
+
+"----------------------------------------------------------------------
+" ack / ag integration
+"----------------------------------------------------------------------
+let g:ackprg = 'ag --nogroup --nocolor --column'
+map <Leader>a :Ack<Space>
+
+"----------------------------------------------------------------------
+" fzf setup
+" Reference URLs
+" https://github.com/junegunn/fzf#as-vim-plugin
+" https://github.com/junegunn/fzf/blob/master/README-VIM.md
+"----------------------------------------------------------------------
+" If installed using git
+set rtp+=~/.fzf
+
+"----------------------------------------------------------------------
+" NERD Tree setup
+"----------------------------------------------------------------------
+let NERDTreeIgnore=['\.pyc$', '\~$'] "ignore files in NERDTree
+
+"----------------------------------------------------------------------
+" ctags setup
+" https://courses.cs.washington.edu/courses/cse451/10au/tutorials/tutorial_ctags.html
+"----------------------------------------------------------------------
+" command
+" Ctrl-]					Jump to the tag underneath the cursor
+" Ctrl-t					Jump back up in the tag stack 
+" :ts <tag> <RET> Search for a particular tag
+" :tn							Go to the next definition for the last tag
+" :tp							Go to the previous definition for the last tag
+" :ts							List all of the definitions of the last tag
+"
+"set tags=./tags;,tags;
+set tags=./tags;/
+map <c-F12> :!ctags -R --exclude="*.o" --exclude="Build/" -f ./tags .<CR>
+
+"----------------------------------------------------------------------
+" Python PEP 8 stuff
+"----------------------------------------------------------------------
+" Number of spaces that a pre-existing tab is equal to.
+au BufRead,BufNewFile *py,*pyw,*.c,*.h,*.js set tabstop=2
+au BufRead,BufNewFile *.py,*pyw set shiftwidth=2
+au BufRead,BufNewFile *.py,*.pyw set expandtab
+au BufRead,BufNewFile *.py set softtabstop=2
+au BufRead,BufNewFile *.py set showmatch
+
+" Use the below highlight group when displaying bad whitespace is desired.
+highlight BadWhitespace ctermbg=red guibg=red
+
+" Display tabs at the beginning of a line in Python mode as bad.
+au BufRead,BufNewFile *.py,*.pyw match BadWhitespace /^\t\+/
+" Make trailing whitespace be flagged as bad.
+au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
+au BufRead,BufNewFile *.py,*.pyw, set textwidth=100
+au BufNewFile *.py,*.pyw,*.c,*.h set fileformat=unix
+
+syntax on
+
+let python_highlight_all=1
+
+autocmd FileType python set autoindent
+set backspace=indent,eol,start
+
+"----------------------------------------------------------------------
+"Javascript Support
+"----------------------------------------------------------------------
+"js stuff"
+autocmd FileType javascript setlocal shiftwidth=2 tabstop=2
+
+"----------------------------------------------------------------------
+" Window Movement Support
+"----------------------------------------------------------------------
+" split navigations
+" Ctrl-j move to the split below
+" Ctrl-k move to the split above
+" Ctrl-l move to the split to the right
+" Ctrl-h move to the split to the left
+set splitbelow
+set splitright
+nnoremap <C-J> <C-W><C-J>
+nnoremap <C-K> <C-W><C-K>
+nnoremap <C-L> <C-W><C-L>
+nnoremap <C-H> <C-W><C-H>
+
+"----------------------------------------------------------------------
+" rg configuration
+"----------------------------------------------------------------------
+let g:rg_binary="/usr/bin/rg"
+let g:rg_format="%f:%l:%c:%m"
+let g:rg_command="/usr/bin/rg --vimgrep"
+let g:rg_highlight="true"
+let g:rg_derive_root="false"
+let g:rg_root_types=['.git']
+let g:rg_window_location="botright"
