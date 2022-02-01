@@ -1,9 +1,18 @@
-;;; initfile --- Summary:
-;;; Commentary:
-;;; Emacs 27.1
-;;; Date: August 25, 2019
-;;; Author: Thomas Tang
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; initfile --- Summary:
+;; Commentary:
+;; Emacs 27.1 and newer tested
+;; Date: Augunst 25, 2019
+;; Author: Thomas Tang
+;; Configuration/Customization:
+;; Defines global variables that are later used to customize and set
+;; up packages.
+
+(defun executable-find (command)
+  "Search for COMMAND in `exec-path' and return the absolute file name.
+Return nil if COMMAND is not found anywhere in `exec-path'."
+  ;; Use 1 rather than file-executable-p to better match the behavior of
+  ;; call-process.
+  (locate-file command exec-path exec-suffixes 1))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Set packages to install
@@ -11,6 +20,7 @@
 (setq package-archives '(("melpa-stable" . "https://stable.melpa.org/packages/")
                          ("melpa" . "http://melpa.milkbox.net/packages/")
                          ("gnu" . "http://elpa.gnu.org/packages/")))
+
 ;; Disable package initialize after us.  We either initialize it
 ;; anyway in case of interpreted .emacs, or we don't want slow
 ;; initizlization in case of byte-compiled .emacs.elc.
@@ -46,6 +56,7 @@
 ;; By default Emacs triggers garbage collection at ~0.8MB which makes
 ;; startup really slow. Since most systems have at least 64MB of memory,
 ;; we increase it during initialization.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq gc-cons-threshold 64000000)
 (add-hook 'after-init-hook #'(lambda ()
 	;; restore after startup
@@ -64,28 +75,25 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; General Tweaks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; turn on highlight matching brackets when cursor is on one
 (show-paren-mode t)
-;; Overwrite region selected
+
 (delete-selection-mode t)
-;; Show column numbers by default
+
 (setq column-number-mode t)
-;; Use CUA to delete selections
-(setq cua-mode t)
-(setq cua-enable-cua-keys nil)
-;; Prevent emacs from creating a bckup file filename~
+
+;; (setq cua-mode t)
+;; (setq cua-enable-cua-keys nil)
+
 (setq make-backup-files nil)
-;; Settings for searching
+
 (setq-default case-fold-search t ;case insensitive searches by default
               search-highlight t) ;hilit matches when searching
-;; Highlight the line we are currently on
+
 (global-hl-line-mode t)
-;; Disable the toolbar at the top since it's useless
-(if (functionp 'tool-bar-mode) (tool-bar-mode -1))
+
+;; (if (functionp 'tool-bar-mode) (tool-bar-mode -1))
 
 ;; Remove trailing white space upon saving
-;; Note: because of a bug in EIN we only delete trailing whitespace
-;; when not in EIN mode.
 (add-hook 'before-save-hook
           (lambda ()
             (when (not (derived-mode-p 'ein:notebook-multilang-mode))
@@ -94,55 +102,35 @@
 ;; Auto-wrap at 92 characters
 (setq-default auto-fill-function 'do-auto-fill)
 (setq-default fill-column 92)
+
 (turn-on-auto-fill)
-;; Disable auto-fill-mode in programming mode
+
 (add-hook 'prog-mode-hook (lambda () (auto-fill-mode -1)))
 
 ;; Global Keyboard Shortcuts
-;; Set help to C-?
 (global-set-key (kbd "C-?") 'help-command)
-;; Set mark paragraph to M-?
 (global-set-key (kbd "M-?") 'mark-paragraph)
-;; Set backspace to C-h
 (global-set-key (kbd "C-h") 'delete-backward-char)
-;; Set backspace word to M-h
 (global-set-key (kbd "M-h") 'backward-kill-word)
-;; Use meta+tab word completion
 (global-set-key (kbd "M-TAB") 'dabbrev-expand)
-;; Easy undo key
 (global-set-key (kbd "C-/") 'undo)
-;; Comment or uncomment the region
 (global-set-key (kbd "C-c ;") 'comment-or-uncomment-region)
-;; Indent after a newline, if required by syntax of language
 (global-set-key (kbd "C-m") 'newline-and-indent)
-;; Load the compile ocmmand
 (global-set-key (kbd "C-c C-c") 'compile)
-;; Undo, basically C-x u
 (global-set-key (kbd "C-/") 'undo)
-;; Find file in project
 (global-set-key (kbd "C-x M-f") 'project-find-file)
-;; Smex is a M-x enhancement for interface to mostly recently used commands.
 (global-set-key (kbd "M-x") 'smex)
 
-;; We don't want to type yes and no all the time so, do y and n
 (defalias 'yes-or-no-p 'y-or-n-p)
-;; Disable the horrid auto-save
+
 (setq auto-save-default nil)
 
-;; Disable the menu bar since we don't use it, especially not in the
-;; terminal
 (when (and (not (eq system-type 'darwin)) (fboundp 'menu-bar-mode))
   (menu-bar-mode -1))
 
-;; Don't ring the bell
 (setq ring-bell-function 'ignore)
-
-;; Non-nil means draw block cursor as wide as the glyph under it.
-;; For example, if a block cursor is over a tab, it will be drawn as
-;; wide as that tab on the display.
 (setq x-stretch-cursor t)
 
-;; Dont ask to follow symlink in git
 (setq vc-follow-symlinks t)
 
 ;; Check (on save) whether the file edited contains a shebang, if yes,
@@ -166,17 +154,16 @@
 ;; Setup use-package
 (eval-when-compile
   (require 'use-package))
+
 (use-package bind-key
   :ensure t)
-;; so we can (require 'use-package) even in compiled emacs to e.g. read docs
+
 (use-package use-package
   :commands use-package-autoload-keymap)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Enable terminal emacs to copy and paste from system clipboard
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Note: this uses C-c before the usual C-w, M-w, and C-y
-;; From: https://stackoverflow.com/questions/64360/how-to-copy-text-from-emacs-to-another-application-on-linux
 (defun my-copy-to-xclipboard(arg)
   (interactive "P")
   (cond
@@ -227,8 +214,8 @@
 ;; s is used by ycmd, origami, etc and sometimes during Emacs
 ;; upgrades disappears so we try to install it on its own.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package s
-  :ensure t)
+;; (use-package s
+;;   :ensure t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Automatically compile and save ~/.emacs.el
@@ -267,6 +254,7 @@
      (file-truename "~/.emacs.el")
      (file-truename "~/.emacs.elc"))
     (byte-compile-init-files "~/.emacs.el"))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auto-package-update
@@ -500,20 +488,20 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; string-inflection
-;; used for switching between different cases, eg CamelCase,
-;; lowerCamelCase, snake_case, and SCREAMING_SNAKE_CASE
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package string-inflection
-  :ensure t
-  :defer t
-  :bind (("C-c c i" . string-inflection-cycle)
-         ("C-c c l" . string-inflection-lower-camelcase)
-         ("C-c c c" . string-inflection-camelcase)
-         ("C-c c s" . string-inflection-underscore)
-         ("C-c c u" . string-inflection-upcase)
-         )
-  )
+;; ;; string-inflection
+;; ;; used for switching between different cases, eg CamelCase,
+;; ;; lowerCamelCase, snake_case, and SCREAMING_SNAKE_CASE
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; (use-package string-inflection
+;;   :ensure t
+;;   :defer t
+;;   :bind (("C-c c i" . string-inflection-cycle)
+;;          ("C-c c l" . string-inflection-lower-camelcase)
+;;          ("C-c c c" . string-inflection-camelcase)
+;;          ("C-c c s" . string-inflection-underscore)
+;;          ("C-c c u" . string-inflection-upcase)
+;;          )
+;;   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; multiple-cursors  - https://github.com/magnars/multiple-cursors.el
@@ -547,14 +535,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package window-numbering installed from package list
 ;; Allows switching between buffers using meta-(# key)
-(use-package window-numbering
-  :ensure t
-  :config
-  (eval-when-compile
-    ;; Silence missing function warnings
-    (declare-function window-numbering-mode "window-numbering.el"))
-  (window-numbering-mode t)
-  )
+;; (use-package window-numbering
+;;   :ensure t
+;;   :config
+;;   (eval-when-compile
+;;     ;; Silence missing function warnings
+;;     (declare-function window-numbering-mode "window-numbering.el"))
+;;   (window-numbering-mode t)
+;;   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; wgrep
@@ -570,74 +558,46 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Edit server to allow editing of things in Chrome with Emacs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package edit-server
-  :ensure t
-  :config
-  (progn
-    (eval-when-compile
-      ;; Silence missing function warnings
-      (declare-function edit-server-start "edit-server-start.el"))
-    (when (daemonp)
-      (edit-server-start)
-      )
-    (add-hook 'edit-server-start-hook
-              (lambda ()
-                (when (string-match "github.com" (buffer-name))
-                  (markdown-mode))))
-    )
-  )
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Origami - Does code folding, ie hide the body of an
-;; if/else/for/function so that you can fit more code on your screen
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package origami
-  :ensure t
-  :commands (origami-mode)
-  :bind (:map origami-mode-map
-              ("C-c o :" . origami-recursively-toggle-node)
-              ("C-c o a" . origami-toggle-all-nodes)
-              ("C-c o t" . origami-toggle-node)
-              ("C-c o o" . origami-show-only-node)
-              ("C-c o u" . origami-undo)
-              ("C-c o U" . origami-redo)
-              ("C-c o C-r" . origami-reset)
-              )
-  :config
-  (setq origami-show-fold-header t)
-  ;; The python parser currently doesn't fold if/for/etc. blocks, which is
-  ;; something we want. However, the basic indentation parser does support
-  ;; this with one caveat: you must toggle the node when your cursor is on
-  ;; the line of the if/for/etc. statement you want to collapse. You cannot
-  ;; fold the statement by toggling in the body of the if/for/etc.
-  (add-to-list 'origami-parser-alist '(python-mode . origami-indent-parser))
-  :init
-  (add-hook 'prog-mode-hook 'origami-mode)
-  )
+;; (use-package edit-server
+;;   :ensure t
+;;   :config
+;;   (progn
+;;     (eval-when-compile
+;;       ;; Silence missing function warnings
+;;       (declare-function edit-server-start "edit-server-start.el"))
+;;     (when (daemonp)
+;;       (edit-server-start)
+;;       )
+;;     (add-hook 'edit-server-start-hook
+;;               (lambda ()
+;;                 (when (string-match "github.com" (buffer-name))
+;;                   (markdown-mode))))
+;;     )
+;;   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Rainbow Delimiters -  have delimiters be colored by their depth
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package rainbow-delimiters
-  :ensure t
-  :init
-  (eval-when-compile
-    ;; Silence missing function warnings
-    (declare-function rainbow-delimiters-mode "rainbow-delimiters.el"))
-  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+;; (use-package rainbow-delimiters
+;;   :ensure t
+;;   :init
+;;   (eval-when-compile
+;;     ;; Silence missing function warnings
+;;     (declare-function rainbow-delimiters-mode "rainbow-delimiters.el"))
+;;   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Beacon-mode: flash the cursor when switching buffers or scrolling
 ;;              the goal is to make it easy to find the cursor
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package beacon
-  :ensure t
-  :init
-  (eval-when-compile
-    ;; Silence missing function warnings
-    (declare-function beacon-mode "beacon.el"))
-  :config
-  (beacon-mode t))
+;; (use-package beacon
+;;   :ensure t
+;;   :init
+;;   (eval-when-compile
+;;     ;; Silence missing function warnings
+;;     (declare-function beacon-mode "beacon.el"))
+;;   :config
+;;   (beacon-mode t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; which-key: when you pause on a keyboard shortcut it provides
@@ -656,9 +616,9 @@
 ;; zzz-to-char: replaces the built-in zap-to-char with avy-like
 ;;              replacement options
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package zzz-to-char
-  :ensure t
-  :bind ("M-z" . zzz-up-to-char))
+;; (use-package zzz-to-char
+;;   :ensure t
+;;   :bind ("M-z" . zzz-up-to-char))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; RealGud - https://github.com/realgud/realgud
@@ -678,7 +638,6 @@
 (use-package markdown-mode
   :ensure t
   :mode (".md" ".markdown"))
-  :init (setq markdown-command "/usr/bin/markdown")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Org-Mode
@@ -701,43 +660,51 @@
 (use-package vlf
   :ensure t)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; markdown-mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package markdown-mode
+  :ensure t
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode))
+  :init (setq markdown-command "/usr/bin/markdown"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Load hungry Delete, caus we're lazy
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Set hungry delete:
-(use-package hungry-delete
-  :ensure t
-  :init
-  (eval-when-compile
-    ;; Silence missing function warnings
-    (declare-function global-hungry-delete-mode "hungry-delete.el"))
-  :config
-  (global-hungry-delete-mode t)
-  )
+;; (use-package hungry-delete
+;;   :ensure t
+;;   :init
+;;   (eval-when-compile
+;;     ;; Silence missing function warnings
+;;     (declare-function global-hungry-delete-mode "hungry-delete.el"))
+;;   :config
+;;   (global-hungry-delete-mode t)
+;;   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax Highlighting in CUDA
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Load CUDA mode so we get syntax highlighting in .cu files
-(use-package cuda-mode
-  :ensure t
-  :mode (("\\.cu\\'" . cuda-mode)
-         ("\\.cuh\\'" . cuda-mode)))
+;; (use-package cuda-mode
+;;   :ensure t
+;;   :mode (("\\.cu\\'" . cuda-mode)
+;;          ("\\.cuh\\'" . cuda-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; autopair
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Automatically at closing brace, bracket and quote
-(use-package autopair
-  :ensure t
-  :init
-  (eval-when-compile
-    ;; Silence missing function warnings
-    (declare-function autopair-global-mode "autopair.el"))
-  :config
-  (autopair-global-mode t)
-  )
+;; (use-package autopair
+;;   :ensure t
+;;   :init
+;;   (eval-when-compile
+;;     ;; Silence missing function warnings
+;;     (declare-function autopair-global-mode "autopair.el"))
+;;   :config
+;;   (autopair-global-mode t)
+;;   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Flyspell Mode for Spelling Corrections
@@ -835,54 +802,6 @@
   :ensure t
   :mode (".json" ".imp"))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; rust-mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (add-to-list 'load-path "/home/tangth/rust-mode/")
-;; (autoload 'rust-mode "rust-mode" nil t)
-;; (use-package rust-mode
-;;    (add-hook 'rust-mode-hook #'racer-mode)
-;;    (add-hook 'racer-mode-hook #'eldoc-mode)
-;;    (add-hook 'rust-mode-hook
-;; 	(lambda () (setq indent-tabs-mode nil)))
-;; )
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; lsp-mode
-;; Programming Language Auto Complete using LSP Client and Server
-;; https://github.com/emacs-lsp/lsp-mode#installation
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (use-package lsp-mode
-;;   :config
-;;   ;; `-background-index' requires clangd v8+!
-;;   (setq lsp-clients-clangd-args '("-j=4" "-background-index" "-log=error"))
-;;   ;; flycheck is used instead in lsp-ui
-;;   (setq lsp-prefer-flymake nil)
-;;   (add-hook 'c++-mode-hook #'lsp)
-;;   (add-hook 'c-mode-hook #'lsp)
-;;   (add-hook 'python-mode-hook #'lsp))
-
-  ;; (add-hook 'go-mode-hook #'lsp)
-  ;; (add-hook 'rust-mode-hook #'lsp))
-
-;; (use-package lsp-ui
-;;   :requires lsp-mode flycheck
-;;   :config
-
-;;   (setq lsp-ui-doc-enable t
-;;         lsp-ui-doc-use-childframe t
-;;         lsp-ui-doc-position 'top
-;;         lsp-ui-doc-include-signature t
-;;         lsp-ui-sideline-enable nil
-;;         lsp-ui-flycheck-enable t
-;;         lsp-ui-flycheck-list-position 'right
-;;         lsp-ui-flycheck-live-reporting t
-;;         lsp-ui-peek-enable t
-;;         lsp-ui-peek-list-width 60
-;;         lsp-ui-peek-peek-height 25)
-
-;;   (add-hook 'lsp-mode-hook 'lsp-ui-mode))
-
 
 ;; For completions at cursor, use company-mode
 ;; (use-package company
@@ -893,69 +812,33 @@
 ;;   (global-set-key (kbd "C-<tab>") 'company-complete))
 
 
-;; (use-package company-lsp
-;;   :requires company
-;;   :config
-;;   (push 'company-lsp company-backends)
-
-;;    ;; Disable client-side cache because the LSP server does a better job.
-;;   (setq company-transformers nil
-;;         company-lsp-async t
-;;         company-lsp-cache-candidates nil))
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; cmake-mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package cmake-mode
-  :ensure t
-  :mode ("CMakeLists.txt" ".cmake")
-  :hook (cmake-mode . (lambda ()
-                        (add-to-list 'company-backends 'company-cmake)))
-  :config
-  (use-package cmake-font-lock
-    :ensure t
-    :defer t
-    :commands (cmake-font-lock-activate)
-    :hook (cmake-mode . (lambda ()
-                          (cmake-font-lock-activate)
-                          (font-lock-add-keywords
-                           nil '(("\\<\\(FIXME\\|TODO\\|BUG\\|DONE\\)"
-                                  1 font-lock-warning-face t)))
-                          ))
-    )
-  )
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package: yasnippet
-;; http://www.howardism.org/Technical/Emacs/templates-tutorial.htm;
-;; https://iloveemacs.wordpress.com/2015/07/17/yasnippet-and-auto-completion/
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package yasnippet
-  :ensure t
-  :commands (yas-reload-all)
-  :init
-  (eval-when-compile
-    ;; Silence missing function warnings
-    (declare-function yas-global-mode "yasnippet.el"))
-  :defer 5
-  :config
-  (yas-global-mode t)
-  (yas-reload-all))
+;; (use-package yasnippet
+;;   :ensure t
+;;   :commands (yas-reload-all)
+;;   :init
+;;   (eval-when-compile
+;;     ;; Silence missing function warnings
+;;     (declare-function yas-global-mode "yasnippet.el"))
+;;   :defer 5
+;;   :config
+;;   (yas-global-mode t)
+;;   (yas-reload-all))
 
-(use-package yasnippet-snippets
-  :ensure t
-  :after yasnippet
-  :config
-  (yas-reload-all))
+;; (use-package yasnippet-snippets
+;;   :ensure t
+;;   :after yasnippet
+;;   :config
+;;   (yas-reload-all))
 
 ;; Apparently the company-yasnippet backend shadows all backends that
 ;; come after it. To work around this we assign yasnippet to a different
 ;; keybind since actual source completion is vital.
-(use-package company-yasnippet
-  :bind ("C-M-y" . company-yasnippet)
-  :after (yasnippet))
+;; (use-package company-yasnippet
+;;   :bind ("C-M-y" . company-yasnippet)
+;;   :after (yasnippet))
 
 
 
@@ -980,6 +863,8 @@
 
 (set-face-background 'hl-line "#372E2D")
 ;; The minibuffer default colors with my theme are impossible to read, so change
+
+
 ;; them to something better using ivy-minibuffer-match-face.
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -1013,18 +898,14 @@
 ;; Hide the scroll bar
 (scroll-bar-mode -1)
 (defvar my-font-size 120)
-;; Make mode bar small
 (set-face-attribute 'mode-line nil  :height my-font-size)
-;; Set the header bar font
 (set-face-attribute 'header-line nil  :height my-font-size)
-;; Set default window size and position
 (setq default-frame-alist
       '((top . 0) (left . 0) ;; position
         (width . 110) (height . 45) ;; size
         ))
-;; Enable line numbers on the LHS
+
 (global-linum-mode -1)
-;; Set the font to size 9 (90/10).
 (set-face-attribute 'default nil :height my-font-size)
 
 (setq-default indicate-empty-lines t)
@@ -1035,149 +916,149 @@
 ;; Enable which function mode and set the header line to display both the
 ;; path and the function we're in
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(which-function-mode t)
+;; (which-function-mode t)
 
-;; Remove function from mode bar
-(setq mode-line-misc-info
-      (delete (assoc 'which-func-mode
-                     mode-line-misc-info) mode-line-misc-info))
+;; ;; Remove function from mode bar
+;; (setq mode-line-misc-info
+;;       (delete (assoc 'which-func-mode
+;;                      mode-line-misc-info) mode-line-misc-info))
 
 
-(defmacro with-face
-    (str &rest properties)
-  `(propertize ,str 'face (list ,@properties)))
+;; (defmacro with-face
+;;     (str &rest properties)
+;;   `(propertize ,str 'face (list ,@properties)))
 
-(defun sl/make-header ()
-  "."
-  (let* ((sl/full-header (abbreviate-file-name buffer-file-name))
-         (sl/header (file-name-directory sl/full-header))
-         (sl/drop-str "[...]")
-         )
-    (if (> (length sl/full-header)
-           (window-body-width))
-        (if (> (length sl/header)
-               (window-body-width))
-            (progn
-              (concat (with-face sl/drop-str
-                                 :background "blue"
-                                 :weight 'bold
-                                 )
-                      (with-face (substring sl/header
-                                            (+ (- (length sl/header)
-                                                  (window-body-width))
-                                               (length sl/drop-str))
-                                            (length sl/header))
-                                 ;; :background "red"
-                                 :weight 'bold
-                                 )))
-          (concat
-           (with-face sl/header
-                      ;; :background "red"
-                      :foreground "red"
-                      :weight 'bold)))
-      (concat (if window-system ;; In the terminal the green is hard to read
-                  (with-face sl/header
-                             ;; :background "green"
-                             ;; :foreground "black"
-                             :weight 'bold
-                             :foreground "#8fb28f"
-                             )
-                (with-face sl/header
-                           ;; :background "green"
-                           ;; :foreground "black"
-                           :weight 'bold
-                           :foreground "blue"
-                           ))
-              (with-face (file-name-nondirectory buffer-file-name)
-                         :weight 'bold
-                         ;; :background "red"
-                         )))))
+;; (defun sl/make-header ()
+;;   "."
+;;   (let* ((sl/full-header (abbreviate-file-name buffer-file-name))
+;;          (sl/header (file-name-directory sl/full-header))
+;;          (sl/drop-str "[...]")
+;;          )
+;;     (if (> (length sl/full-header)
+;;            (window-body-width))
+;;         (if (> (length sl/header)
+;;                (window-body-width))
+;;             (progn
+;;               (concat (with-face sl/drop-str
+;;                                  :background "blue"
+;;                                  :weight 'bold
+;;                                  )
+;;                       (with-face (substring sl/header
+;;                                             (+ (- (length sl/header)
+;;                                                   (window-body-width))
+;;                                                (length sl/drop-str))
+;;                                             (length sl/header))
+;;                                  ;; :background "red"
+;;                                  :weight 'bold
+;;                                  )))
+;;           (concat
+;;            (with-face sl/header
+;;                       ;; :background "red"
+;;                       :foreground "red"
+;;                       :weight 'bold)))
+;;       (concat (if window-system ;; In the terminal the green is hard to read
+;;                   (with-face sl/header
+;;                              ;; :background "green"
+;;                              ;; :foreground "black"
+;;                              :weight 'bold
+;;                              :foreground "#8fb28f"
+;;                              )
+;;                 (with-face sl/header
+;;                            ;; :background "green"
+;;                            ;; :foreground "black"
+;;                            :weight 'bold
+;;                            :foreground "blue"
+;;                            ))
+;;               (with-face (file-name-nondirectory buffer-file-name)
+;;                          :weight 'bold
+;;                          ;; :background "red"
+;;                          )))))
 
-(defun sl/display-header ()
-  "Create the header string and display it."
-  ;; The dark blue in the header for which-func is terrible to read.
-  ;; However, in the terminal it's quite nice
-  (if window-system
-      (custom-set-faces
-       '(which-func ((t (:foreground "#8fb28f")))))
-    (custom-set-faces
-     '(which-func ((t (:foreground "blue"))))))
-  ;; Set the header line
-  (setq header-line-format
+;; (defun sl/display-header ()
+;;   "Create the header string and display it."
+;;   ;; The dark blue in the header for which-func is terrible to read.
+;;   ;; However, in the terminal it's quite nice
+;;   (if window-system
+;;       (custom-set-faces
+;;        '(which-func ((t (:foreground "#8fb28f")))))
+;;     (custom-set-faces
+;;      '(which-func ((t (:foreground "blue"))))))
+;;   ;; Set the header line
+;;   (setq header-line-format
 
-        (list "-"
-              '(which-func-mode ("" which-func-format))
-              '("" ;; invocation-name
-                (:eval (if (buffer-file-name)
-                           (concat "[" (sl/make-header) "]")
-                         "[%b]")))
-              )
-        )
-  )
-;; Call the header line update
-(add-hook 'buffer-list-update-hook
-          'sl/display-header)
+;;         (list "-"
+;;               '(which-func-mode ("" which-func-format))
+;;               '("" ;; invocation-name
+;;                 (:eval (if (buffer-file-name)
+;;                            (concat "[" (sl/make-header) "]")
+;;                          "[%b]")))
+;;               )
+;;         )
+;;   )
+;; ;; Call the header line update
+;; (add-hook 'buffer-list-update-hook
+;;           'sl/display-header)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Powerline theme
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; powerline theme where the modes are on the right side.
-(use-package powerline
-  :ensure t
-  :config
-  (defun powerline-right-theme ()
-    "Setup a mode-line with major and minor modes on the right side."
-    (interactive)
-    (setq-default mode-line-format
-                  '("%e"
-                    (:eval
-                     (let* ((active (powerline-selected-window-active))
-                            (mode-line-buffer-id (if active 'mode-line-buffer-id 'mode-line-buffer-id-inactive))
-                            (mode-line (if active 'mode-line 'mode-line-inactive))
-                            (face0 (if active 'powerline-active0 'powerline-inactive0))
-                            (face1 (if active 'powerline-active1 'powerline-inactive1))
-                            (face2 (if active 'powerline-active2 'powerline-inactive2))
-                            (separator-left (intern (format "powerline-%s-%s"
-                                                            (powerline-current-separator)
-                                                            (car powerline-default-separator-dir))))
-                            (separator-right (intern (format "powerline-%s-%s"
-                                                             (powerline-current-separator)
-                                                             (cdr powerline-default-separator-dir))))
-                            (lhs (list (powerline-raw "%*" face0 'l)
-                                       (powerline-buffer-size face0 'l)
-                                       (powerline-buffer-id `(mode-line-buffer-id ,face0) 'l)
-                                       (powerline-raw " ")
-                                       (funcall separator-left face0 face1)
-                                       (powerline-narrow face1 'l)
-                                       (powerline-vc face1)))
-                            (center (list (powerline-raw global-mode-string face1 'r)
-                                          (powerline-raw "%4l" face1 'r)
-                                          (powerline-raw ":" face1)
-                                          (powerline-raw "%3c" face1 'r)
-                                          (funcall separator-right face1 face0)
-                                          (powerline-raw " ")
-                                          (powerline-raw "%6p" face0 'r)
-                                          (powerline-hud face2 face1)
-                                          ))
-                            (rhs (list (powerline-raw " " face1)
-                                       (funcall separator-left face1 face2)
-                                       (when (and (boundp 'erc-track-minor-mode) erc-track-minor-mode)
-                                         (powerline-raw erc-modified-channels-object face2 'l))
-                                       (powerline-major-mode face2 'l)
-                                       (powerline-process face2)
-                                       (powerline-raw " :" face2)
-                                       (powerline-minor-modes face2 'l)
-                                       (powerline-raw " " face2)
-                                       (funcall separator-right face2 face1)
-                                       ))
-                            )
-                       (concat (powerline-render lhs)
-                               (powerline-fill-center face1 (/ (powerline-width center) 2.0))
-                               (powerline-render center)
-                               (powerline-fill face1 (powerline-width rhs))
-                               (powerline-render rhs)))))))
-  (powerline-right-theme)
-  )
+;; (use-package powerline
+;;   :ensure t
+;;   :config
+;;   (defun powerline-right-theme ()
+;;     "Setup a mode-line with major and minor modes on the right side."
+;;     (interactive)
+;;     (setq-default mode-line-format
+;;                   '("%e"
+;;                     (:eval
+;;                      (let* ((active (powerline-selected-window-active))
+;;                             (mode-line-buffer-id (if active 'mode-line-buffer-id 'mode-line-buffer-id-inactive))
+;;                             (mode-line (if active 'mode-line 'mode-line-inactive))
+;;                             (face0 (if active 'powerline-active0 'powerline-inactive0))
+;;                             (face1 (if active 'powerline-active1 'powerline-inactive1))
+;;                             (face2 (if active 'powerline-active2 'powerline-inactive2))
+;;                             (separator-left (intern (format "powerline-%s-%s"
+;;                                                             (powerline-current-separator)
+;;                                                             (car powerline-default-separator-dir))))
+;;                             (separator-right (intern (format "powerline-%s-%s"
+;;                                                              (powerline-current-separator)
+;;                                                              (cdr powerline-default-separator-dir))))
+;;                             (lhs (list (powerline-raw "%*" face0 'l)
+;;                                        (powerline-buffer-size face0 'l)
+;;                                        (powerline-buffer-id `(mode-line-buffer-id ,face0) 'l)
+;;                                        (powerline-raw " ")
+;;                                        (funcall separator-left face0 face1)
+;;                                        (powerline-narrow face1 'l)
+;;                                        (powerline-vc face1)))
+;;                             (center (list (powerline-raw global-mode-string face1 'r)
+;;                                           (powerline-raw "%4l" face1 'r)
+;;                                           (powerline-raw ":" face1)
+;;                                           (powerline-raw "%3c" face1 'r)
+;;                                           (funcall separator-right face1 face0)
+;;                                           (powerline-raw " ")
+;;                                           (powerline-raw "%6p" face0 'r)
+;;                                           (powerline-hud face2 face1)
+;;                                           ))
+;;                             (rhs (list (powerline-raw " " face1)
+;;                                        (funcall separator-left face1 face2)
+;;                                        (when (and (boundp 'erc-track-minor-mode) erc-track-minor-mode)
+;;                                          (powerline-raw erc-modified-channels-object face2 'l))
+;;                                        (powerline-major-mode face2 'l)
+;;                                        (powerline-process face2)
+;;                                        (powerline-raw " :" face2)
+;;                                        (powerline-minor-modes face2 'l)
+;;                                        (powerline-raw " " face2)
+;;                                        (funcall separator-right face2 face1)
+;;                                        ))
+;;                             )
+;;                        (concat (powerline-render lhs)
+;;                                (powerline-fill-center face1 (/ (powerline-width center) 2.0))
+;;                                (powerline-render center)
+;;                                (powerline-fill face1 (powerline-width rhs))
+;;                                (powerline-render rhs)))))))
+;;   (powerline-right-theme)
+;;   )
 
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1192,39 +1073,12 @@
 ;; custom setup
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-(provide '.emacs)
-;;; .emacs ends here
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ansi-color-faces-vector
-   [default default default italic underline success warning error])
  '(ansi-color-names-vector
-   ["#2e3436" "#a40000" "#4e9a06" "#c4a000" "#204a87" "#5c3566" "#729fcf" "#eeeeec"])
- '(column-number-mode t)
- '(counsel-locate-cmd 'counsel-locate-cmd-default)
- '(cua-mode t nil (cua-base))
- '(custom-enabled-themes '(wombat))
- '(custom-safe-themes
-   '("8e797edd9fa9afec181efbfeeebf96aeafbd11b69c4c85fa229bb5b9f7f7e66c" "2b9dc43b786e36f68a9fd4b36dd050509a0e32fe3b0a803310661edb7402b8b6" "47ec21abaa6642fefec1b7ace282221574c2dd7ef7715c099af5629926eb4fd7" "b583823b9ee1573074e7cbfd63623fe844030d911e9279a7c8a5d16de7df0ed0" "1436d643b98844555d56c59c74004eb158dc85fc55d2e7205f8d9b8c860e177f" "585942bb24cab2d4b2f74977ac3ba6ddbd888e3776b9d2f993c5704aa8bb4739" "a22f40b63f9bc0a69ebc8ba4fbc6b452a4e3f84b80590ba0a92b4ff599e53ad0" "8f97d5ec8a774485296e366fdde6ff5589cf9e319a584b845b6f7fa788c9fa9a" default))
- '(frame-brackground-mode 'dark)
- '(git-gutter:update-interval 5)
- '(locate-fcodes-file "/Users/tangt/tangth_db")
- '(locate-update-path "/")
- '(lsp-auto-guess-root nil)
- '(lsp-prefer-flymake nil t)
- '(lsp-ui-doc-border "black")
- '(lsp-ui-doc-enable t)
- '(lsp-ui-doc-header t)
- '(lsp-ui-doc-include-signature t)
- '(lsp-ui-doc-position 'top)
- '(lsp-ui-sideline-enable nil)
- '(lsp-ui-sideline-ignore-duplicate t)
- '(lsp-ui-sideline-show-code-actions nil)
- '(package-selected-packages
-   '(zones markdown-mode+ markdown-preview-eww markdown-changelog markdown-preview-mode edit-indirect ac-ispell company flymake-rust toml toml-mode lsp-ui c++-mode dumb-jump-mode dumb-jump virtualenvwrapper company-lsp lsp-mode eglot racer flycheck-rust cargo lua-mode flycheck-golangci-lint format-all go-tag go-autocomplete go-mode evil vue-mode vyper-mode zenburn-theme smiles-mode gruber-darker-theme multicolumn zencoding-mode gruvbox-theme dired-hide-dotfiles ag geben-helm-projectile counsel-hydra ivy-hydra fuzzy fzf counsel-world-clock counsel-projectile magit-gerrit magit zzz-to-char yasnippet-snippets yapfify yaml-mode writegood-mode window-numbering which-key wgrep web-mode vlf use-package string-inflection sourcerer-theme realgud rainbow-delimiters powerline origami multiple-cursors modern-cpp-font-lock markdown-mode json-mode hungry-delete google-c-style git-gutter flyspell-correct-ivy flycheck-ycmd flycheck-pyflakes elpy edit-server cuda-mode counsel-etags company-ycmd company-jedi cmake-font-lock clang-format beacon autopair auto-package-update auctex async))
- '(pdf-view-midnight-colors '("#fdf4c1" . "#32302f"))
- '(show-paren-mode t)
- '(tool-bar-mode nil))
+   ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
+ '(custom-enabled-themes '(adwaita))
+ '(git-gutter:update-interval 5))
