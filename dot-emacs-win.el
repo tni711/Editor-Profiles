@@ -15,6 +15,13 @@
                          ("gnu" . "https://elpa.gnu.org/packages/")))
 
 
+(unless (package-installed-p 'quelpa)
+  (with-temp-buffer
+    (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
+    (eval-buffer)
+    (quelpa-self-upgrade)))
+
+
 (setq package-enable-at-startup nil)
 ;; Ask package.el to not add (package-initialize) to .emacs.
 (setq package--init-file-ensured t)
@@ -34,12 +41,12 @@
           ;; The reverse is necessary, because outside we mapc
           ;; add-to-list element-by-element, which reverses.
           (nreverse (apply #'nconc
-		;; Only keep package.el provided loadpaths.
-			(mapcar #'(lambda (path)
-				(if (string-prefix-p package-user-dir-real path)
-					(list path)
-						nil))
-						load-path))))))
+			   ;; Only keep package.el provided loadpaths.
+			   (mapcar #'(lambda (path)
+				       (if (string-prefix-p package-user-dir-real path)
+					   (list path)
+					 nil))
+				   load-path))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -184,16 +191,16 @@
 
 ;; Highlight some keywords in prog-mode
 (add-hook 'prog-mode-hook
-    (lambda ()
-    ;; Highlighting in cmake-mode this way interferes with
-    ;; cmake-font-lock, which is something I don't yet understand.
-    (when (not (derived-mode-p 'cmake-mode))
-	(font-lock-add-keywords
-	nil
-	'(("\\<\\(FIXME\\|TODO\\|BUG\\|DONE\\)"
-	    1 font-lock-warning-face t))))
-    )
-    )
+	  (lambda ()
+	    ;; Highlighting in cmake-mode this way interferes with
+	    ;; cmake-font-lock, which is something I don't yet understand.
+	    (when (not (derived-mode-p 'cmake-mode))
+	      (font-lock-add-keywords
+	       nil
+	       '(("\\<\\(FIXME\\|TODO\\|BUG\\|DONE\\)"
+		  1 font-lock-warning-face t))))
+	    )
+	  )
 
 ;; Setup use-package
 (eval-when-compile
@@ -313,8 +320,8 @@
   (setq auto-package-update-hide-results t)
   (auto-package-update-maybe)
   (add-hook 'auto-package-update-before-hook
-    (lambda () (message "I will update packages now")))
-)
+	    (lambda () (message "I will update packages now")))
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; hide dot files in dired mode
@@ -445,8 +452,8 @@
   (add-hook
    'prog-mode-hook
    (lambda () (add-hook 'after-save-hook
-	(lambda ()
-	    (counsel-etags-virtual-update-tags))))
+			(lambda ()
+			  (counsel-etags-virtual-update-tags))))
    )
 
   ;; The function provided by counsel-etags is broken (at least on Linux)
@@ -511,7 +518,7 @@
   :ensure t
   :config
   (projectile-global-mode)
-(setq projectile-completion-system 'ivy))
+  (setq projectile-completion-system 'ivy))
 
 (use-package counsel-projectile
   :ensure t
@@ -524,7 +531,7 @@
   (global-set-key (kbd "C-c pb") 'counsel-projectile-switch-to-buffer)
   (global-set-key (kbd "C-c pg") 'counsel-projectile-grep)
   (global-set-key (kbd "C-c pm") 'counsel-projectile-mode)
-)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; avy: always fast jump to char inside the current view buffer
@@ -573,15 +580,15 @@
 ;; Dumb Jump to definitions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package dumb-jump
-:ensure t
-:bind (("M-g o" . dumb-jump-go-other-window)
-	("M-g j" . dumb-jump-go)
-	("M-g b" . dumb-jump-back)
-	("M-g i" . dumb-jump-go-prompt)
-	("M-g x" . dumb-jump-go-prefer-external)
-	("M-g z" . dumb-jump-go-prefer-external-other-window))
-:config (setq dumb-jump-selector 'ivy) ;; (setq dumb-jump-selector 'helm)
-)
+  :ensure t
+  :bind (("M-g o" . dumb-jump-go-other-window)
+	 ("M-g j" . dumb-jump-go)
+	 ("M-g b" . dumb-jump-back)
+	 ("M-g i" . dumb-jump-go-prompt)
+	 ("M-g x" . dumb-jump-go-prefer-external)
+	 ("M-g z" . dumb-jump-go-prefer-external-other-window))
+  :config (setq dumb-jump-selector 'ivy) ;; (setq dumb-jump-selector 'helm)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Window numbering
@@ -704,7 +711,7 @@
 (use-package markdown-mode
   :ensure t
   :mode (".md" ".markdown"))
-  :init (setq markdown-command "/usr/bin/markdown")
+:init (setq markdown-command "/usr/bin/markdown")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Org-Mode
@@ -730,17 +737,18 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Load hungry Delete, caus we're lazy
+;; conflict with find-file in emacs 28.2
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Set hungry delete:
-(use-package hungry-delete
-  :ensure t
-  :init
-  (eval-when-compile
-    ;; Silence missing function warnings
-    (declare-function global-hungry-delete-mode "hungry-delete.el"))
-  :config
-  (global-hungry-delete-mode t)
-  )
+;; (use-package hungry-delete
+;;   :ensure t
+;;   :init
+;;   (eval-when-compile
+;;     ;; Silence missing function warnings
+;;     (declare-function global-hungry-delete-mode "hungry-delete.el"))
+;;   :config
+;;   (global-hungry-delete-mode t)
+;;   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax Highlighting in CUDA
@@ -813,6 +821,14 @@
          ("\\.html?\\'" . web-mode))
   )
 
+(defun my-web-mode-hook ()
+  "Hooks for Web mode."
+  (setq web-mode-markup-indent-offset 2)
+  )
+
+(add-hook 'web-mode-hook  'my-web-mode-hook)
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; yaml-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -849,7 +865,7 @@
                                   1 font-lock-warning-face t)))
                           ))
     )
-)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; flycheck mode
@@ -867,10 +883,69 @@
   :ensure t
   :mode (("\\.js\\'" . rjsx-mode)
          ("\\.ts\\'" . rjsx-mode)
+         ("\\.tsx\\'" . rjsx-mode)
          ("\\.jsx\\'" . rjsx-mode))
-)
+  )
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Packages for javascript and typescript
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package tree-sitter
+  :ensure t
+  :config
+  ;; activate tree-sitter on any buffer containing code for which it has a parser available
+  (global-tree-sitter-mode)
+  ;; you can easily see the difference tree-sitter-hl-mode makes for python, ts or tsx
+  ;; by switching on and off
+  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+
+(use-package tree-sitter-langs
+  :ensure t
+  :after tree-sitter)
+
+
+
+(use-package typescript-mode
+  :after tree-sitter
+  :config
+  ;; we choose this instead of tsx-mode so that eglot can automatically figure out language for server
+  ;; see https://github.com/joaotavora/eglot/issues/624 and https://github.com/joaotavora/eglot#handling-quirky-servers
+  (define-derived-mode typescriptreact-mode typescript-mode
+    "TypeScript TSX")
+
+  ;; use our derived mode for tsx files
+  (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))
+  ;; by default, typescript-mode is mapped to the treesitter typescript parser
+  ;; use our derived mode to map both .tsx AND .ts -> typescriptreact-mode -> treesitter tsx
+  (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)))
+
+
+;; https://github.com/orzechowskid/tsi.el/
+;; great tree-sitter-based indentation for typescript/tsx, css, json
+(use-package tsi
+  :after tree-sitter
+  :quelpa (tsi :fetcher github :repo "orzechowskid/tsi.el")
+  ;; define autoload definitions which when actually invoked will cause package to be loaded
+  :commands (tsi-typescript-mode tsi-json-mode tsi-css-mode)
+  :init
+  (add-hook 'typescript-mode-hook (lambda () (tsi-typescript-mode 1)))
+  (add-hook 'json-mode-hook (lambda () (tsi-json-mode 1)))
+  (add-hook 'css-mode-hook (lambda () (tsi-css-mode 1)))
+  (add-hook 'scss-mode-hook (lambda () (tsi-scss-mode 1))))
+
+
+;; auto-format different source code files extremely intelligently
+;; https://github.com/radian-software/apheleia
+(use-package apheleia
+  :ensure t
+  :config
+  (apheleia-global-mode +1))
+
+
+;; lsp language server
+(use-package eglot
+  :ensure t)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Tide
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -882,6 +957,7 @@
   (setq flycheck-check-syntax-automatically '(save mode-enabled))
   (tide-hl-identifier-mode +1)
   (company-mode +1))
+
 
 (use-package tide
   :ensure t
@@ -951,8 +1027,8 @@
 ;; (load-theme 'wombat t)
 
 (use-package doom-themes
-    :ensure t
-    :config (load-theme 'doom-vibrant t))
+  :ensure t
+  :config (load-theme 'doom-vibrant t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Customization
@@ -1183,4 +1259,4 @@
  ;; If there is more than one, they won't work right.
  '(git-gutter:update-interval 5)
  '(package-selected-packages
-   '(rust-mode prettier-js rjsx-mode org-roam-setup tide flycheck company company-mode org-roam doom-themes zzz-to-char yasnippet-snippets yaml-mode writegood-mode window-numbering which-key wgrep web-mode vlf use-package typescript-mode string-inflection realgud rainbow-delimiters powerline origami multiple-cursors markdown-mode magit json-mode hungry-delete git-gutter fzf evil dumb-jump dired-hide-dotfiles cuda-mode counsel-projectile counsel-etags cmake-font-lock beacon auto-package-update async ag)))
+   '(quelpa-use-package eglot quelpa apheleia tree-sitter-langs tree-sitter rust-mode prettier-js rjsx-mode org-roam-setup tide flycheck company company-mode org-roam doom-themes zzz-to-char yasnippet-snippets yaml-mode writegood-mode window-numbering which-key wgrep web-mode vlf use-package typescript-mode string-inflection realgud rainbow-delimiters powerline origami multiple-cursors markdown-mode magit json-mode hungry-delete git-gutter fzf evil dumb-jump dired-hide-dotfiles cuda-mode counsel-projectile counsel-etags cmake-font-lock beacon auto-package-update async ag)))
