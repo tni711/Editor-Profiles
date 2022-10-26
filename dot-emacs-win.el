@@ -21,9 +21,19 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
                          ("melpa" . "http://melpa.milkbox.net/packages/")
                          ("gnu" . "http://elpa.gnu.org/packages/")))
 
+<<<<<<< HEAD
 ;; Disable package initialize after us.  We either initialize it
 ;; anyway in case of interpreted .emacs, or we don't want slow
 ;; initizlization in case of byte-compiled .emacs.elc.
+=======
+(unless (package-installed-p 'quelpa)
+  (with-temp-buffer
+    (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
+    (eval-buffer)
+    (quelpa-self-upgrade)))
+
+
+>>>>>>> 481c38631e0f9e3db30ad272016a335a333cbabe
 (setq package-enable-at-startup nil)
 ;; Ask package.el to not add (package-initialize) to .emacs.
 (setq package--init-file-ensured t)
@@ -45,12 +55,12 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
           ;; The reverse is necessary, because outside we mapc
           ;; add-to-list element-by-element, which reverses.
           (nreverse (apply #'nconc
-		;; Only keep package.el provided loadpaths.
-			(mapcar #'(lambda (path)
-				(if (string-prefix-p package-user-dir-real path)
-					(list path)
-						nil))
-						load-path))))))
+			   ;; Only keep package.el provided loadpaths.
+			   (mapcar #'(lambda (path)
+				       (if (string-prefix-p package-user-dir-real path)
+					   (list path)
+					 nil))
+				   load-path))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; By default Emacs triggers garbage collection at ~0.8MB which makes
@@ -146,6 +156,7 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
 
 ;; Highlight some keywords in prog-mode
 (add-hook 'prog-mode-hook
+<<<<<<< HEAD
           (lambda ()
             ;; Highlighting in cmake-mode this way interferes with
             ;; cmake-font-lock, which is something I don't yet understand.
@@ -156,6 +167,18 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
                   1 font-lock-warning-face t))))
             )
           )
+=======
+	  (lambda ()
+	    ;; Highlighting in cmake-mode this way interferes with
+	    ;; cmake-font-lock, which is something I don't yet understand.
+	    (when (not (derived-mode-p 'cmake-mode))
+	      (font-lock-add-keywords
+	       nil
+	       '(("\\<\\(FIXME\\|TODO\\|BUG\\|DONE\\)"
+		  1 font-lock-warning-face t))))
+	    )
+	  )
+>>>>>>> 481c38631e0f9e3db30ad272016a335a333cbabe
 
 ;; Setup use-package
 (eval-when-compile
@@ -274,7 +297,11 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
   (setq auto-package-update-hide-results t)
   (auto-package-update-maybe)
   (add-hook 'auto-package-update-before-hook
+<<<<<<< HEAD
           (lambda () (message "I will update packages now")))
+=======
+	    (lambda () (message "I will update packages now")))
+>>>>>>> 481c38631e0f9e3db30ad272016a335a333cbabe
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -398,8 +425,13 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
   (add-hook
    'prog-mode-hook
    (lambda () (add-hook 'after-save-hook
+<<<<<<< HEAD
                         (lambda ()
                           (counsel-etags-virtual-update-tags))))
+=======
+			(lambda ()
+			  (counsel-etags-virtual-update-tags))))
+>>>>>>> 481c38631e0f9e3db30ad272016a335a333cbabe
    )
 
   ;; The function provided by counsel-etags is broken (at least on Linux)
@@ -464,7 +496,7 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
   :ensure t
   :config
   (projectile-global-mode)
-(setq projectile-completion-system 'ivy))
+  (setq projectile-completion-system 'ivy))
 
 (use-package counsel-projectile
   :ensure t
@@ -477,7 +509,7 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
   (global-set-key (kbd "C-c pb") 'counsel-projectile-switch-to-buffer)
   (global-set-key (kbd "C-c pg") 'counsel-projectile-grep)
   (global-set-key (kbd "C-c pm") 'counsel-projectile-mode)
-)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; avy: always fast jump to char inside the current view buffer
@@ -526,15 +558,15 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
 ;; Dumb Jump to definitions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package dumb-jump
-:ensure t
-:bind (("M-g o" . dumb-jump-go-other-window)
-	("M-g j" . dumb-jump-go)
-	("M-g b" . dumb-jump-back)
-	("M-g i" . dumb-jump-go-prompt)
-	("M-g x" . dumb-jump-go-prefer-external)
-	("M-g z" . dumb-jump-go-prefer-external-other-window))
-:config (setq dumb-jump-selector 'ivy) ;; (setq dumb-jump-selector 'helm)
-)
+  :ensure t
+  :bind (("M-g o" . dumb-jump-go-other-window)
+	 ("M-g j" . dumb-jump-go)
+	 ("M-g b" . dumb-jump-back)
+	 ("M-g i" . dumb-jump-go-prompt)
+	 ("M-g x" . dumb-jump-go-prefer-external)
+	 ("M-g z" . dumb-jump-go-prefer-external-other-window))
+  :config (setq dumb-jump-selector 'ivy) ;; (setq dumb-jump-selector 'helm)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Window numbering
@@ -644,6 +676,10 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
 (use-package markdown-mode
   :ensure t
   :mode (".md" ".markdown"))
+<<<<<<< HEAD
+=======
+:init (setq markdown-command "/usr/bin/markdown")
+>>>>>>> 481c38631e0f9e3db30ad272016a335a333cbabe
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Org-Mode
@@ -677,6 +713,7 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Load hungry Delete, caus we're lazy
+;; conflict with find-file in emacs 28.2
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Set hungry delete:
 ;; (use-package hungry-delete
@@ -797,9 +834,17 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
 (defun my-web-mode-hook ()
   "Hooks for Web mode."
   (setq web-mode-markup-indent-offset 2)
+<<<<<<< HEAD
 )
 (add-hook 'web-mode-hook  'my-web-mode-hook)
 
+=======
+  )
+
+(add-hook 'web-mode-hook  'my-web-mode-hook)
+
+
+>>>>>>> 481c38631e0f9e3db30ad272016a335a333cbabe
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; yaml-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -815,14 +860,140 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
   :mode (".json" ".imp"))
 
 
+<<<<<<< HEAD
 ;; For completions at cursor, use company-mode
 ;; (use-package company
 ;;   :config
 ;;   (setq company-idle-delay 0.3)
+=======
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; cmake mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package cmake-mode
+  :ensure t
+  :mode ("CMakeLists.txt" ".cmake")
+  :hook (cmake-mode . (lambda ()
+                        (add-to-list 'company-backends 'company-cmake)))
+  :config
+  (use-package cmake-font-lock
+    :ensure t
+    :defer t
+    :commands (cmake-font-lock-activate)
+    :hook (cmake-mode . (lambda ()
+                          (cmake-font-lock-activate)
+                          (font-lock-add-keywords
+                           nil '(("\\<\\(FIXME\\|TODO\\|BUG\\|DONE\\)"
+                                  1 font-lock-warning-face t)))
+                          ))
+    )
+  )
+>>>>>>> 481c38631e0f9e3db30ad272016a335a333cbabe
 
 ;;   (global-company-mode 1)
 ;;   (global-set-key (kbd "C-<tab>") 'company-complete))
 
+<<<<<<< HEAD
+=======
+;;(global-flycheck-mode t)
+;;(add-hook 'after-init-hook #'global-flycheck-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; RJSX mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package rjsx-mode
+  :ensure t
+  :mode (("\\.js\\'" . rjsx-mode)
+         ("\\.ts\\'" . rjsx-mode)
+         ("\\.tsx\\'" . rjsx-mode)
+         ("\\.jsx\\'" . rjsx-mode))
+  )
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Packages for javascript and typescript
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package tree-sitter
+  :ensure t
+  :config
+  ;; activate tree-sitter on any buffer containing code for which it has a parser available
+  (global-tree-sitter-mode)
+  ;; you can easily see the difference tree-sitter-hl-mode makes for python, ts or tsx
+  ;; by switching on and off
+  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+
+(use-package tree-sitter-langs
+  :ensure t
+  :after tree-sitter)
+
+
+
+(use-package typescript-mode
+  :after tree-sitter
+  :config
+  ;; we choose this instead of tsx-mode so that eglot can automatically figure out language for server
+  ;; see https://github.com/joaotavora/eglot/issues/624 and https://github.com/joaotavora/eglot#handling-quirky-servers
+  (define-derived-mode typescriptreact-mode typescript-mode
+    "TypeScript TSX")
+
+  ;; use our derived mode for tsx files
+  (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))
+  ;; by default, typescript-mode is mapped to the treesitter typescript parser
+  ;; use our derived mode to map both .tsx AND .ts -> typescriptreact-mode -> treesitter tsx
+  (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)))
+
+
+;; https://github.com/orzechowskid/tsi.el/
+;; great tree-sitter-based indentation for typescript/tsx, css, json
+(use-package tsi
+  :after tree-sitter
+  :quelpa (tsi :fetcher github :repo "orzechowskid/tsi.el")
+  ;; define autoload definitions which when actually invoked will cause package to be loaded
+  :commands (tsi-typescript-mode tsi-json-mode tsi-css-mode)
+  :init
+  (add-hook 'typescript-mode-hook (lambda () (tsi-typescript-mode 1)))
+  (add-hook 'json-mode-hook (lambda () (tsi-json-mode 1)))
+  (add-hook 'css-mode-hook (lambda () (tsi-css-mode 1)))
+  (add-hook 'scss-mode-hook (lambda () (tsi-scss-mode 1))))
+
+
+;; auto-format different source code files extremely intelligently
+;; https://github.com/radian-software/apheleia
+(use-package apheleia
+  :ensure t
+  :config
+  (apheleia-global-mode +1))
+
+
+;; lsp language server
+(use-package eglot
+  :ensure t)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Tide
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun setup-tide-mode()
+  "Setup function for tide."
+  (interactive)
+  (tide-setup)
+  (flycheck-mode +1)
+  (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  (tide-hl-identifier-mode +1)
+  (company-mode +1))
+
+
+(use-package tide
+  :ensure t
+  :after (rjsx-mode company flycheck)
+  :hook (rjsx-mode . setup-tide-mode))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Prettier
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package prettier-js
+  :ensure t
+  :after (rjsx-mode)
+  :hook (rjsx-mode . prettier-js-mode))
+>>>>>>> 481c38631e0f9e3db30ad272016a335a333cbabe
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package: yasnippet
@@ -873,8 +1044,8 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
 ;; (load-theme 'wombat t)
 
 (use-package doom-themes
-    :ensure t
-    :config (load-theme 'doom-vibrant t))
+  :ensure t
+  :config (load-theme 'doom-vibrant t))
 
 (set-face-background 'hl-line "#372E2D")
 ;; The minibuffer default colors with my theme are impossible to read, so change
@@ -1111,6 +1282,7 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
  '(jdee-db-spec-breakpoint-face-colors (cons "#1c1f24" "#484854"))
  '(objed-cursor-color "#ff665c")
  '(package-selected-packages
+<<<<<<< HEAD
    '(web-beautify rust-mode doom-themes json-mode yaml-mode web-mode git-gutter magit vlf writegood-mode markdown-mode realgud which-key wgrep dumb-jump multiple-cursors avy counsel-projectile projectile counsel-etags counsel swiper ivy fzf ag evil dired-hide-dotfiles auto-package-update async use-package))
  '(pdf-view-midnight-colors (cons "#bbc2cf" "#242730"))
  '(rustic-ansi-faces
@@ -1137,3 +1309,6 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
     (cons 340 "#62686E")
     (cons 360 "#62686E")))
  '(vc-annotate-very-old-color nil))
+=======
+   '(quelpa-use-package eglot quelpa apheleia tree-sitter-langs tree-sitter rust-mode prettier-js rjsx-mode org-roam-setup tide flycheck company company-mode org-roam doom-themes zzz-to-char yasnippet-snippets yaml-mode writegood-mode window-numbering which-key wgrep web-mode vlf use-package typescript-mode string-inflection realgud rainbow-delimiters powerline origami multiple-cursors markdown-mode magit json-mode hungry-delete git-gutter fzf evil dumb-jump dired-hide-dotfiles cuda-mode counsel-projectile counsel-etags cmake-font-lock beacon auto-package-update async ag)))
+>>>>>>> 481c38631e0f9e3db30ad272016a335a333cbabe
