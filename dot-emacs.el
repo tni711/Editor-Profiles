@@ -79,6 +79,12 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
 
 (delete-selection-mode t)
 
+(setq js-indent-level 2)
+(setq-default js2-basic-offset 2)
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 2)
+(setq indent-line-function 'insert-tab)
+
 (setq column-number-mode t)
 
 ;; (setq cua-mode t)
@@ -788,6 +794,12 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
          ("\\.html?\\'" . web-mode))
   )
 
+(defun my-web-mode-hook ()
+  "Hooks for Web mode."
+  (setq web-mode-markup-indent-offset 2)
+)
+(add-hook 'web-mode-hook  'my-web-mode-hook)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; yaml-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -858,8 +870,11 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
 ;;     :ensure t
 ;;     :config (load-theme 'zenburn t))
 
-(load-theme 'wombat t)
+;; (load-theme 'wombat t)
 
+(use-package doom-themes
+    :ensure t
+    :config (load-theme 'doom-vibrant t))
 
 (set-face-background 'hl-line "#372E2D")
 ;; The minibuffer default colors with my theme are impossible to read, so change
@@ -1080,5 +1095,45 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
    ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
- '(custom-enabled-themes '(adwaita))
- '(git-gutter:update-interval 5))
+ '(custom-enabled-themes '(doom-vibrant))
+ '(custom-safe-themes
+   '("a3010c151dc4f42d56dec26a85ae5640afc227bece71d058e394667718b66a49" default))
+ '(exwm-floating-border-color "#1c1f24")
+ '(fci-rule-color "#62686E")
+ '(git-gutter:update-interval 5)
+ '(highlight-tail-colors
+   ((("#2c3636" "#99bb66" "green")
+     . 0)
+    (("#293b44" "#46D9FF" "brightcyan")
+     . 20)))
+ '(jdee-db-active-breakpoint-face-colors (cons "#1c1f24" "#51afef"))
+ '(jdee-db-requested-breakpoint-face-colors (cons "#1c1f24" "#7bc275"))
+ '(jdee-db-spec-breakpoint-face-colors (cons "#1c1f24" "#484854"))
+ '(objed-cursor-color "#ff665c")
+ '(package-selected-packages
+   '(web-beautify rust-mode doom-themes json-mode yaml-mode web-mode git-gutter magit vlf writegood-mode markdown-mode realgud which-key wgrep dumb-jump multiple-cursors avy counsel-projectile projectile counsel-etags counsel swiper ivy fzf ag evil dired-hide-dotfiles auto-package-update async use-package))
+ '(pdf-view-midnight-colors (cons "#bbc2cf" "#242730"))
+ '(rustic-ansi-faces
+   ["#242730" "#ff665c" "#7bc275" "#FCCE7B" "#51afef" "#C57BDB" "#5cEfFF" "#bbc2cf"])
+ '(vc-annotate-background "#242730")
+ '(vc-annotate-color-map
+   (list
+    (cons 20 "#7bc275")
+    (cons 40 "#a6c677")
+    (cons 60 "#d1ca79")
+    (cons 80 "#FCCE7B")
+    (cons 100 "#f4b96e")
+    (cons 120 "#eda461")
+    (cons 140 "#e69055")
+    (cons 160 "#db8981")
+    (cons 180 "#d082ae")
+    (cons 200 "#C57BDB")
+    (cons 220 "#d874b0")
+    (cons 240 "#eb6d86")
+    (cons 260 "#ff665c")
+    (cons 280 "#d15e59")
+    (cons 300 "#a35758")
+    (cons 320 "#754f56")
+    (cons 340 "#62686E")
+    (cons 360 "#62686E")))
+ '(vc-annotate-very-old-color nil))
