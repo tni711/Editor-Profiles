@@ -77,6 +77,9 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (show-paren-mode t)
 
+;; a modern file manager, improved version of dired
+(dirvish-override-dired-mode)
+
 (delete-selection-mode t)
 
 (setq js-indent-level 2)
